@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import NewUser from './components/NewUser';
+import EditUser from './components/EditUser';
 
 // https://rest-api-without-db.herokuapp.com/users
 // /users -> GET -> {id, username, email}
@@ -13,6 +14,11 @@ const API_URL = 'https://rest-api-without-db.herokuapp.com/users';
 
 const App = () => {
   const [users, setUsers] = useState([]);
+  const [currentUser, setCurrentUser] = useState({
+    id: '',
+    username: '',
+    email: ''
+  });
 
   const getAllUsers = () => {
     fetch(API_URL)
@@ -45,10 +51,31 @@ const App = () => {
       .catch((error) => console.log(error));
   };
 
+  const handleEditUser = (id, userData) => {
+    fetch(API_URL + `/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(userData)
+    })
+      .then(() => {
+        setCurrentUser({
+          id: '',
+          username: '',
+          email: ''
+        });
+        getAllUsers();
+      })
+      .catch((error) => console.log(error));
+  };
+
   return (
     <div>
       <h1>User Managemenet App</h1>
-      <NewUser onHandleAddUser={handleAddUser} />
+      {(currentUser.id.length && (
+        <EditUser currentUser={currentUser} onHandleEditUser={handleEditUser} />
+      )) || <NewUser onHandleAddUser={handleAddUser} />}
       <section className="users">
         {users.map((user) => {
           const { id, username, email } = user;
@@ -56,7 +83,12 @@ const App = () => {
             <article key={id} className="user">
               <h4>{username}</h4>
               <p>{email}</p>
-              <button>Edit</button>
+              <button
+                onClick={() => {
+                  setCurrentUser(user);
+                }}>
+                Edit
+              </button>
               <button
                 onClick={() => {
                   handleDelete(id);

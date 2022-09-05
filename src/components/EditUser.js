@@ -1,11 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
-const NewUser = ({ onHandleAddUser }) => {
+const NewUser = ({ currentUser, onHandleEditUser }) => {
   const [user, setUser] = useState({
     username: '',
     email: ''
   });
+
+  useEffect(() => {
+    setUser({
+      username: currentUser.username,
+      email: currentUser.email
+    });
+  }, [currentUser]);
 
   const handleChange = (e) => {
     const fieldName = e.target.name;
@@ -16,11 +23,7 @@ const NewUser = ({ onHandleAddUser }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onHandleAddUser(user);
-    setUser({
-      username: '',
-      email: ''
-    });
+    onHandleEditUser(currentUser.id, user);
   };
 
   return (
@@ -47,13 +50,14 @@ const NewUser = ({ onHandleAddUser }) => {
           required
         />
       </div>
-      <button type="submit">Add User</button>
+      <button type="submit">Edit User</button>
     </form>
   );
 };
 
 NewUser.propTypes = {
-  onHandleAddUser: PropTypes.func
+  onHandleEditUser: PropTypes.func,
+  currentUser: PropTypes.object
 };
 
 export default NewUser;
